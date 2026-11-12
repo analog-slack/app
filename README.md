@@ -17,13 +17,14 @@ pnpm install
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 docker compose up -d
-pnpm --filter api db:migrate --name init
+pnpm --filter api db:migrate
 pnpm dev
 ```
 
 - Web: http://localhost:3000
 - API: http://localhost:4000/health, Swagger: http://localhost:4000/docs
 - S3-консоль (RustFS): http://localhost:9001/rustfs/console/ (minioadmin / minioadmin), бакет `uploads` создать в консоли
+- Структура таблиц и порядок работы с миграциями: [docs/database.md](docs/database.md)
 
 ## Команды
 
