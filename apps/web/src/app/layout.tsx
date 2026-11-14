@@ -1,16 +1,42 @@
 import './globals.css';
 
+import type { Metadata } from 'next';
+import { Geologica, Golos_Text } from 'next/font/google';
 import type { ReactNode } from 'react';
+
+import { dictionaries } from '@/shared/i18n';
+import { getLocale } from '@/shared/i18n/get-locale';
+import { ThemeScript } from '@/shared/theme';
 
 import { Providers } from './providers';
 
-export const metadata = { title: 'Analog Slack' };
+const display = Geologica({
+  subsets: ['latin', 'cyrillic'],
+  variable: '--font-geologica',
+  display: 'swap',
+});
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+const sans = Golos_Text({
+  subsets: ['latin', 'cyrillic'],
+  variable: '--font-golos',
+  display: 'swap',
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { meta } = dictionaries[await getLocale()];
+  return { title: meta.title, description: meta.description };
+}
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang={locale} className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers locale={locale}>{children}</Providers>
       </body>
     </html>
   );
