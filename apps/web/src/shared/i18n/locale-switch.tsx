@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/shared/lib';
+import { cn } from '@/lib';
 
 import { useI18n } from './i18n-provider';
 

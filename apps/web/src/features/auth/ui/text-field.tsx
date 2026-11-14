@@ -1,6 +1,6 @@
 import { type ComponentProps, useId } from 'react';
 
-import { cn } from '@/shared/lib';
+import { cn } from '@/lib';
 
 export function TextField({
   label,

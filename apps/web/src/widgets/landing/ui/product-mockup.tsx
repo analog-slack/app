@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { type ReactNode, useEffect, useState } from 'react';
 
 import { type Dictionary, useI18n } from '@/shared/i18n';
-import { cn } from '@/shared/lib';
+import { cn } from '@/lib';
 import { EASE_OUT } from '@/shared/ui';
 
 type CardId = keyof Dictionary['mockup']['cards'];

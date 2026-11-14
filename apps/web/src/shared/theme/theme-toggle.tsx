@@ -3,7 +3,7 @@
 import { Moon, Sun } from 'lucide-react';
 
 import { useI18n } from '@/shared/i18n';
-import { cn } from '@/shared/lib';
+import { cn } from '@/lib';
 
 import { THEME_STORAGE_KEY } from './theme-script';
 

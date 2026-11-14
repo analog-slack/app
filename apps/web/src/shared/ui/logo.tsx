@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { APP_NAME } from '@/shared/config';
-import { cn } from '@/shared/lib';
+import { cn } from '@/lib';
 
 export function Logo({ label, className }: { label: string; className?: string }) {
   return (
