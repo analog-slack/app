@@ -8,6 +8,8 @@ import { EventsGateway } from './events.gateway';
 import { PrismaService } from './prisma.service';
 import { StorageService } from './storage.service';
 import { AiService } from './ai.service';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { AiService } from './ai.service';
       },
     }),
   ],
-  controllers: [AppController],
-  providers: [PrismaService, EventsGateway, StorageService, AiService],
+  controllers: [AppController, AuthController],
+  providers: [PrismaService, EventsGateway, StorageService, AiService, AuthService],
 })
 export class AppModule {}
