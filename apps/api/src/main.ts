@@ -1,16 +1,16 @@
 import './instrument';
 
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { createOpenApiDocument } from './openapi';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({ origin: process.env.CORS_ORIGIN, credentials: true });
+  app.enableCors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000', credentials: true });
 
-  const config = new DocumentBuilder().setTitle('API').setVersion('0.1.0').build();
-  SwaggerModule.setup('docs', app, () => SwaggerModule.createDocument(app, config));
+  SwaggerModule.setup('docs', app, () => createOpenApiDocument(app));
 
   await app.listen(process.env.PORT ?? 4000);
 }
