@@ -1,47 +1,64 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState } from 'react';
+import { useAuthRegister } from '@packages/api';
+import { LoaderCircle } from 'lucide-react';
+import { type SubmitEvent, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
+import { getApiErrorStatus } from '@/shared/api';
+import { ROUTES, withReturnTo } from '@/shared/config';
 import { useI18n } from '@/shared/i18n';
 
 import { createRegisterSchema, type RegisterValues } from '../model/schemas';
+import { useAuthSession } from '../model/use-auth-session';
 import { AuthFormFrame } from './auth-form-frame';
 import { TextField } from './text-field';
 
-export function RegisterForm() {
+export function RegisterForm({ returnTo }: { returnTo?: string }) {
   const { t } = useI18n();
   const a = t.auth;
   const schema = useMemo(() => createRegisterSchema(a.errors), [a.errors]);
-  const [submitted, setSubmitted] = useState(false);
+  const { mutateAsync } = useAuthRegister();
+  const { setSession } = useAuthSession();
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm<RegisterValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: '', email: '', password: '', confirm: '' },
   });
 
-  // TODO: заменить на запрос к API регистрации
-  const onSubmit = () => setSubmitted(true);
+  async function onSubmit({ name, email, password }: RegisterValues) {
+    try {
+      await setSession(await mutateAsync({ data: { username: name, email, password } }));
+    } catch (error) {
+      setError('root', {
+        message: getApiErrorStatus(error) === 409 ? a.errors.accountExists : a.errors.unavailable,
+      });
+    }
+  }
 
   return (
     <AuthFormFrame
       title={a.register.title}
       subtitle={a.register.subtitle}
-      notice={submitted ? a.stub : undefined}
       alt={a.register.alt}
       altLink={a.register.altLink}
-      altHref="/login"
+      altHref={withReturnTo(ROUTES.LOGIN, returnTo)}
     >
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        noValidate
+        onSubmit={(event: SubmitEvent<HTMLFormElement>) => void handleSubmit(onSubmit)(event)}
+        className="space-y-4"
+      >
         <TextField
           label={a.fields.name}
-          autoComplete="name"
+          autoComplete="username"
           error={errors.name?.message}
           {...register('name')}
         />
@@ -66,7 +83,13 @@ export function RegisterForm() {
           error={errors.confirm?.message}
           {...register('confirm')}
         />
-        <Button type="submit" size="lg" className="h-11 w-full">
+        {errors.root?.message && (
+          <p role="alert" className="text-sm text-destructive">
+            {errors.root.message}
+          </p>
+        )}
+        <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
+          {isSubmitting && <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />}
           {a.register.submit}
         </Button>
       </form>

@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/shared/config';
 import { useI18n } from '@/shared/i18n';
 import { EASE_OUT } from '@/shared/ui';
 
@@ -61,10 +62,10 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.55, ease: EASE_OUT }}
         >
           <Button asChild size="lg" className="h-12 px-7 text-base">
-            <Link href="/register">{t.hero.primary}</Link>
+            <Link href={ROUTES.REGISTER}>{t.hero.primary}</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 px-7 text-base">
-            <Link href="/login">{t.hero.secondary}</Link>
+            <Link href={ROUTES.LOGIN}>{t.hero.secondary}</Link>
           </Button>
         </motion.div>
 

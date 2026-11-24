@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-/** Общая обвязка форм входа и регистрации: заголовок, сообщение-заглушка, ссылка на соседнюю форму. */
 export function AuthFormFrame({
   title,
   subtitle,
-  notice,
   alt,
   altLink,
   altHref,
@@ -13,7 +11,6 @@ export function AuthFormFrame({
 }: {
   title: string;
   subtitle: string;
-  notice?: string;
   alt: string;
   altLink: string;
   altHref: string;
@@ -25,10 +22,6 @@ export function AuthFormFrame({
       <p className="mt-2 text-muted-foreground">{subtitle}</p>
 
       <div className="mt-8">{children}</div>
-
-      <p role="status" className="mt-4 text-sm leading-relaxed text-muted-foreground empty:hidden">
-        {notice}
-      </p>
 
       <p className="mt-6 text-sm text-muted-foreground">
         {alt}{' '}

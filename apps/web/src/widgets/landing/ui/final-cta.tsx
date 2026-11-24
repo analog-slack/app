@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/shared/config';
 import { useI18n } from '@/shared/i18n';
 import { Reveal } from '@/shared/ui';
 
@@ -17,10 +18,10 @@ export function FinalCta() {
         </h2>
         <div className="flex flex-wrap items-center gap-3">
           <Button asChild size="lg" className="h-12 px-7 text-base">
-            <Link href="/register">{t.cta.primary}</Link>
+            <Link href={ROUTES.REGISTER}>{t.cta.primary}</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 px-7 text-base">
-            <Link href="/login">{t.cta.secondary}</Link>
+            <Link href={ROUTES.LOGIN}>{t.cta.secondary}</Link>
           </Button>
         </div>
       </Reveal>

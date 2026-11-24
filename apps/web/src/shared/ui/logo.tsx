@@ -1,12 +1,12 @@
 import Link from 'next/link';
 
-import { APP_NAME } from '@/shared/config';
+import { APP_NAME, ROUTES } from '@/shared/config';
 import { cn } from '@/lib';
 
 export function Logo({ label, className }: { label: string; className?: string }) {
   return (
     <Link
-      href="/"
+      href={ROUTES.HOME}
       aria-label={`${APP_NAME}. ${label}`}
       className={cn(
         'inline-flex items-center gap-2 rounded-md font-display text-lg font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring',

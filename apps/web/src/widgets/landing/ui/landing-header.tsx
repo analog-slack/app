@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/shared/config';
 import { LocaleSwitch, useI18n } from '@/shared/i18n';
 import { ThemeToggle } from '@/shared/theme';
 import { Logo } from '@/shared/ui';
@@ -39,10 +40,10 @@ export function LandingHeader() {
           <LocaleSwitch />
           <ThemeToggle />
           <Button asChild variant="ghost" size="sm" className="ml-1">
-            <Link href="/login">{t.header.login}</Link>
+            <Link href={ROUTES.LOGIN}>{t.header.login}</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href="/register">{t.header.register}</Link>
+            <Link href={ROUTES.REGISTER}>{t.header.register}</Link>
           </Button>
         </div>
       </div>
