@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Workspace, type WorkspaceMemberRole } from '@prisma/client';
 
 import { PrismaService } from '../prisma.service';
@@ -17,6 +17,33 @@ export function effectiveWorkspaceRole(
 @Injectable()
 export class WorkspaceAccessService {
   constructor(private readonly prisma: PrismaService) {}
+
+  withWorkspaceLock<T>(
+    workspaceId: string,
+    run: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const rows = await tx.$queryRaw<{ id: string }[]>`
+        SELECT id FROM workspaces WHERE id = ${workspaceId}::uuid FOR UPDATE
+      `;
+        if (rows.length === 0) throw new NotFoundException('Workspace not found');
+        return run(tx);
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
+    );
+  }
+
+  async requireRole(
+    workspaceId: string,
+    userId: string,
+    db: Prisma.TransactionClient,
+    ...allowed: WorkspaceRole[]
+  ) {
+    const membership = await this.requireMembership(workspaceId, userId, db);
+    if (!allowed.includes(membership.role)) throw new ForbiddenException();
+    return membership;
+  }
 
   async requireMembership(
     workspaceId: string,

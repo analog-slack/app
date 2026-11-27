@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsString, Length, Matches } from 'class-validator';
+import { WorkspaceMemberRole } from '@prisma/client';
+import { IsEnum, IsString, IsUUID, Length, Matches } from 'class-validator';
 
 import { workspaceRoles, type WorkspaceRole } from './workspace-access.service';
 
@@ -38,4 +39,33 @@ export class WorkspaceDto {
 
   @ApiProperty({ enum: workspaceRoles })
   role: WorkspaceRole;
+}
+
+export class WorkspaceMemberDto {
+  @ApiProperty({ format: 'uuid' })
+  userId: string;
+
+  @ApiProperty()
+  username: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  avatarUrl: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  joinedAt: string | null;
+
+  @ApiProperty({ enum: workspaceRoles })
+  role: WorkspaceRole;
+}
+
+export class UpdateWorkspaceMemberRoleDto {
+  @ApiProperty({ enum: WorkspaceMemberRole })
+  @IsEnum(WorkspaceMemberRole)
+  role: WorkspaceMemberRole;
+}
+
+export class TransferWorkspaceOwnershipDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  userId: string;
 }
