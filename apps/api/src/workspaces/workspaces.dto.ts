@@ -6,12 +6,15 @@ import { IsEnum, IsString, IsUUID, Length, Matches } from 'class-validator';
 import { workspaceRoles, type WorkspaceRole } from './workspace-access.service';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// PostgreSQL counts Unicode code points and rejects NUL and invalid UTF-8.
+// eslint-disable-next-line no-control-regex
+const NAME = /^[^\u0000\uD800-\uDFFF]{1,150}$/u;
 
 export class CreateWorkspaceDto {
   @ApiProperty({ minLength: 1, maxLength: 150 })
   @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
-  @Length(1, 150)
+  @Matches(NAME, { message: 'name must contain 1 to 150 valid Unicode characters without NUL' })
   name: string;
 
   @ApiProperty({ minLength: 1, maxLength: 150, pattern: SLUG.source })

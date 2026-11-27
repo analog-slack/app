@@ -136,6 +136,41 @@ it('exposes the token only on creation and accepts supported expiration values',
   }
 });
 
+it('previews invitations for guests and members without joining a workspace', async () => {
+  const { owner, workspace, outsider, create, revoke, membershipCount } = await setupInvitations();
+  const { token, id } = await create();
+  const preview = (cookie?: string, inviteToken = token) =>
+    http.request('/workspaces/invitations/preview', 'POST', cookie, { token: inviteToken });
+
+  for (const cookie of [undefined, outsider.cookie, 'accessToken=expired']) {
+    const response = await preview(cookie);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(await response.json()).toEqual({ status: 'active', workspaceName: workspace.name });
+  }
+  expect(await membershipCount()).toBe(0);
+  expect(await (await preview(owner.cookie)).json()).toEqual({
+    status: 'alreadyMember',
+    workspaceId: workspace.id,
+    workspaceName: workspace.name,
+  });
+  expect((await preview(undefined, randomBytes(32).toString('base64url'))).status).toBe(404);
+  expect((await preview(undefined, 'malformed')).status).toBe(400);
+
+  await http.db.prisma.workspaceInviteLink.update({
+    where: { id },
+    data: { expiresAt: new Date() },
+  });
+  expect(await (await preview()).json()).toEqual({ status: 'expired' });
+  expect((await revoke(id)).status).toBe(204);
+  expect(await (await preview(outsider.cookie)).json()).toEqual({ status: 'revoked' });
+  expect(await (await preview(owner.cookie)).json()).toMatchObject({
+    status: 'alreadyMember',
+    workspaceId: workspace.id,
+  });
+  expect(await membershipCount()).toBe(0);
+});
+
 it('reuses active links and opens known inactive links for existing members', async () => {
   const { workspace, another, member, list, create, revoke, accept } = await setupInvitations();
   const reused = await create();

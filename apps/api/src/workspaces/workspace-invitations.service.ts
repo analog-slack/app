@@ -9,6 +9,7 @@ import type {
   CreateWorkspaceInvitationDto,
   CreatedWorkspaceInvitationDto,
   WorkspaceInvitationDto,
+  WorkspaceInvitationPreviewDto,
   WorkspaceInvitationStatus,
 } from './workspace-invitations.dto';
 import type { WorkspaceDto } from './workspaces.dto';
@@ -99,6 +100,31 @@ export class WorkspaceInvitationsService {
         await tx.workspaceInviteLink.update({ where, data: { revokedAt: new Date() } });
       }
     });
+  }
+
+  preview(token: string, actorId?: string): Promise<WorkspaceInvitationPreviewDto> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const invitation = await tx.workspaceInviteLink.findUnique({
+          where: { tokenHash: hashToken(token) },
+          include: { workspace: { select: { id: true, name: true } } },
+        });
+        if (!invitation) throw new NotFoundException('Invitation not found');
+
+        const { id, name } = invitation.workspace;
+        const member =
+          actorId &&
+          (await tx.workspaceMember.findUnique({
+            where: { workspaceId_userId: { workspaceId: id, userId: actorId } },
+            select: { id: true },
+          }));
+        if (member) return { status: 'alreadyMember', workspaceId: id, workspaceName: name };
+
+        const status = invitationStatus(invitation, new Date());
+        return status === 'active' ? { status, workspaceName: name } : { status };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
   }
 
   async accept(actorId: string, token: string): Promise<WorkspaceDto> {

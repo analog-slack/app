@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Header,
+  Headers,
   HttpCode,
   Param,
   ParseUUIDPipe,
@@ -22,17 +23,20 @@ import {
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import { AuthErrorDto } from '../auth/auth.dto';
+import { AccessSessionService } from '../auth/access-session.service';
 import {
   AcceptWorkspaceInvitationDto,
   CreateWorkspaceInvitationDto,
   CreatedWorkspaceInvitationDto,
   WorkspaceInvitationDto,
+  WorkspaceInvitationPreviewDto,
 } from './workspace-invitations.dto';
 import { WorkspaceInvitationsService } from './workspace-invitations.service';
 import { WorkspaceActor, WorkspaceSessionGuard } from './workspace-session.guard';
@@ -101,5 +105,33 @@ export class WorkspaceInvitationsController {
   @ApiGoneResponse({ type: AuthErrorDto })
   acceptInvitation(@WorkspaceActor() actorId: string, @Body() dto: AcceptWorkspaceInvitationDto) {
     return this.invitations.accept(actorId, dto.token);
+  }
+}
+
+@ApiTags('workspaces')
+@Controller('workspaces/invitations')
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+export class WorkspaceInvitationPreviewController {
+  constructor(
+    private readonly invitations: WorkspaceInvitationsService,
+    private readonly session: AccessSessionService,
+  ) {}
+
+  @Post('preview')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ security: [{}, { [AUTH_ACCESS_COOKIE]: [] }] })
+  @ApiOkResponse({ type: WorkspaceInvitationPreviewDto })
+  @ApiBadRequestResponse({ type: AuthErrorDto })
+  @ApiForbiddenResponse({ type: AuthErrorDto })
+  @ApiNotFoundResponse({ type: AuthErrorDto })
+  async previewInvitation(
+    @Body() dto: AcceptWorkspaceInvitationDto,
+    @Headers('cookie') cookie?: string,
+    @Headers('origin') origin?: string,
+  ) {
+    this.session.assertAllowedOrigin(origin);
+    const user = await this.session.findUser(cookie);
+    return this.invitations.preview(dto.token, user?.id);
   }
 }

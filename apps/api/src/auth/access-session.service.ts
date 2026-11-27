@@ -26,6 +26,15 @@ export class AccessSessionService {
     return this.auth.profile(token);
   }
 
+  async findUser(cookie?: string): Promise<AuthUserDto | undefined> {
+    try {
+      return await this.requireUser(cookie);
+    } catch (error) {
+      if (error instanceof UnauthorizedException) return undefined;
+      throw error;
+    }
+  }
+
   assertAllowedOrigin(origin?: string): void {
     const allowed = this.config.get<string>('CORS_ORIGIN') ?? 'http://localhost:3000';
     if (origin !== undefined && origin !== allowed) throw new ForbiddenException();

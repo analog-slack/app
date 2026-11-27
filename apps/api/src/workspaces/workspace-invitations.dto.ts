@@ -22,6 +22,19 @@ export class AcceptWorkspaceInvitationDto {
   token: string;
 }
 
+const previewStatuses = ['alreadyMember', ...invitationStatuses] as const;
+
+export class WorkspaceInvitationPreviewDto {
+  @ApiProperty({ enum: previewStatuses })
+  status: (typeof previewStatuses)[number];
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  workspaceId?: string;
+
+  @ApiPropertyOptional()
+  workspaceName?: string;
+}
+
 export class WorkspaceInvitationDto {
   @ApiProperty({ format: 'uuid' })
   id: string;
