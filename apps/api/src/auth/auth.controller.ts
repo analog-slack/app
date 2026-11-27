@@ -2,7 +2,6 @@ import { AUTH_ACCESS_COOKIE, AUTH_REFRESH_COOKIE, isAuthRefreshToken } from '@ap
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   Header,
   Headers,
@@ -26,15 +25,8 @@ import {
 import type { CookieOptions, Response } from 'express';
 
 import { AuthErrorDto, AuthResponseDto, AuthUserDto, LoginDto, RegisterDto } from './auth.dto';
+import { AccessSessionService, readCookie } from './access-session.service';
 import { ACCESS_TTL_SECONDS, AuthService, SESSION_TTL_MS } from './auth.service';
-
-function readCookie(cookie: string | undefined, name: string) {
-  return cookie
-    ?.split(';')
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${name}=`))
-    ?.slice(name.length + 1);
-}
 
 @ApiTags('auth')
 @Controller('auth')
@@ -43,6 +35,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly config: ConfigService,
+    private readonly session: AccessSessionService,
   ) {}
 
   @Post('login')
@@ -56,7 +49,7 @@ export class AuthController {
     @Headers('origin') origin: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    this.checkOrigin(origin);
+    this.session.assertAllowedOrigin(origin);
     const { accessToken, refreshToken, user } = await this.auth.login(dto);
     this.setSessionCookies(res, accessToken, refreshToken);
     return { user };
@@ -73,7 +66,7 @@ export class AuthController {
     @Headers('origin') origin: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    this.checkOrigin(origin);
+    this.session.assertAllowedOrigin(origin);
     const { accessToken, refreshToken, user } = await this.auth.register(dto);
     this.setSessionCookies(res, accessToken, refreshToken);
     return { user };
@@ -90,7 +83,7 @@ export class AuthController {
     @Headers('origin') origin: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    this.checkOrigin(origin);
+    this.session.assertAllowedOrigin(origin);
     const token = readCookie(cookie, AUTH_REFRESH_COOKIE);
     if (!isAuthRefreshToken(token)) throw new UnauthorizedException('Session expired');
     const { accessToken, user } = await this.auth.refresh(token);
@@ -106,7 +99,7 @@ export class AuthController {
     @Headers('origin') origin: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    this.checkOrigin(origin);
+    this.session.assertAllowedOrigin(origin);
     const token = readCookie(cookie, AUTH_REFRESH_COOKIE);
     if (isAuthRefreshToken(token)) await this.auth.logout(token);
     res.clearCookie(AUTH_ACCESS_COOKIE, this.cookieOptions());
@@ -119,9 +112,7 @@ export class AuthController {
   @ApiOkResponse({ type: AuthUserDto })
   @ApiUnauthorizedResponse({ type: AuthErrorDto })
   profile(@Headers('cookie') cookie?: string) {
-    const token = readCookie(cookie, AUTH_ACCESS_COOKIE);
-    if (!token) throw new UnauthorizedException('Access token required');
-    return this.auth.profile(token);
+    return this.session.requireUser(cookie);
   }
 
   private setSessionCookies(res: Response, accessToken: string, refreshToken: string) {
@@ -146,10 +137,5 @@ export class AuthController {
       sameSite: 'lax',
       path: '/',
     };
-  }
-
-  private checkOrigin(origin: string | undefined) {
-    const allowed = this.config.get<string>('CORS_ORIGIN') ?? 'http://localhost:3000';
-    if (origin !== undefined && origin !== allowed) throw new ForbiddenException();
   }
 }
