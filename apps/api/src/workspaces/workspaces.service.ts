@@ -145,9 +145,9 @@ export class WorkspacesService {
   ): Promise<WorkspaceDto> {
     return this.access.withWorkspaceLock(workspaceId, async (tx) => {
       await this.access.requireRole(workspaceId, actorId, tx, 'owner');
-      if (actorId === targetId)
+      const target = await this.access.requireMembership(workspaceId, targetId, tx);
+      if (target.role === 'owner')
         throw new ConflictException('Workspace owner cannot transfer ownership to themselves');
-      await this.access.requireMembership(workspaceId, targetId, tx);
 
       const workspace = await tx.workspace.update({
         where: { id: workspaceId },

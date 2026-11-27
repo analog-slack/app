@@ -113,6 +113,7 @@ it('removes only permitted memberships and preserves message authorship', async 
   });
 
   expect((await remove(owner, owner)).status).toBe(409);
+  expect((await remove(owner, { ...owner, id: owner.id.toUpperCase() })).status).toBe(409);
   expect((await remove(member, other)).status).toBe(403);
   expect((await remove(admin, admin)).status).toBe(403);
   expect((await remove(admin, member)).status).toBe(204);
@@ -128,6 +129,7 @@ it('removes only permitted memberships and preserves message authorship', async 
 it('transfers ownership to an administrator and makes the former owner an administrator', async () => {
   const { owner, admin, path, transfer, assertOwner } = await setupMembers();
   expect((await transfer(owner)).status).toBe(409);
+  expect((await transfer({ ...owner, id: owner.id.toUpperCase() })).status).toBe(409);
   const response = await transfer(admin);
   expect(response.status).toBe(200);
   expect(await response.json()).toMatchObject({ ownerId: admin.id, role: 'admin' });

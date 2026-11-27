@@ -64,7 +64,11 @@ export class WorkspaceAccessService {
 
     return {
       workspace: membership.workspace,
-      role: effectiveWorkspaceRole(membership.workspace.ownerId, userId, membership.role),
+      role: effectiveWorkspaceRole(
+        membership.workspace.ownerId,
+        membership.userId,
+        membership.role,
+      ),
     };
   }
 }
