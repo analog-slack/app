@@ -2,6 +2,8 @@ import { APP_NAME } from '@/shared/config';
 
 import type { Dictionary } from './ru';
 
+import { enWorkspaces } from './workspaces';
+
 export const en: Dictionary = {
   meta: {
     title: `${APP_NAME} — tasks and conversations in one place`,
@@ -118,6 +120,7 @@ export const en: Dictionary = {
   footer: {
     tagline: 'Tasks and conversations in one place.',
   },
+  workspaces: enWorkspaces,
   auth: {
     login: {
       title: 'Log in',
