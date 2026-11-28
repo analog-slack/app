@@ -10,9 +10,17 @@ export function createOpenApiDocument(app: INestApplication) {
     .addCookieAuth(AUTH_REFRESH_COOKIE, undefined, AUTH_REFRESH_COOKIE)
     .build();
   return SwaggerModule.createDocument(app, config, {
-    operationIdFactory: (controller, method, version) =>
-      controller === 'AuthController'
-        ? `Auth${method[0]?.toUpperCase() ?? ''}${method.slice(1)}`
-        : `${controller}_${method}${version ? `_${version}` : ''}`,
+    operationIdFactory: (controller, method, version) => {
+      const operation = `${method.charAt(0).toUpperCase()}${method.slice(1)}`;
+      if (controller === 'AuthController') return `Auth${operation}`;
+      if (
+        controller === 'WorkspacesController' ||
+        controller === 'WorkspaceInvitationsController' ||
+        controller === 'WorkspaceInvitationPreviewController'
+      ) {
+        return `Workspaces${operation}`;
+      }
+      return `${controller}_${method}${version ? `_${version}` : ''}`;
+    },
   });
 }

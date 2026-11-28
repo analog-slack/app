@@ -8,7 +8,8 @@
     "start": "node dist/main.js",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --testPathIgnorePatterns=workspaces/",
+    "test:workspaces": "jest --runInBand --testPathPatterns=workspaces/",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "postinstall": "prisma generate"
