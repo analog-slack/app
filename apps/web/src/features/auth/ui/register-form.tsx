@@ -10,11 +10,11 @@ import { Button } from '@/components/ui/button';
 import { getApiErrorStatus } from '@/shared/api';
 import { ROUTES, withReturnTo } from '@/shared/config';
 import { useI18n } from '@/shared/i18n';
+import { TextField } from '@/shared/ui';
 
 import { createRegisterSchema, type RegisterValues } from '../model/schemas';
 import { useAuthSession } from '../model/use-auth-session';
 import { AuthFormFrame } from './auth-form-frame';
-import { TextField } from './text-field';
 
 export function RegisterForm({ returnTo }: { returnTo?: string }) {
   const { t } = useI18n();

@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   PROFILE: '/profile',
+  WORKSPACE: (id: string) => `/profile/workspaces/${encodeURIComponent(id)}`,
 } as const;
 
 const LOCAL_ORIGIN = 'https://analog-slack.invalid';

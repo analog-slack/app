@@ -1,5 +1,7 @@
 import { APP_NAME } from '@/shared/config';
 
+import { ruWorkspaces } from './workspaces';
+
 export const ru = {
   meta: {
     title: `${APP_NAME} — задачи и обсуждения в одном месте`,
@@ -116,6 +118,7 @@ export const ru = {
   footer: {
     tagline: 'Задачи и обсуждения в одном месте.',
   },
+  workspaces: ruWorkspaces,
   auth: {
     login: {
       title: 'Вход',

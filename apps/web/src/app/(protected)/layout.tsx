@@ -4,7 +4,7 @@ import { AuthBoundary, AuthShell } from '@/features/auth';
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   return (
-    <AuthShell>
+    <AuthShell wide>
       <AuthBoundary mode="protected">{children}</AuthBoundary>
     </AuthShell>
   );

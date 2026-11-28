@@ -6,3 +6,5 @@ export { AuthBoundary } from './ui/auth-boundary';
 export { AuthProfile } from './ui/auth-profile';
 export { LoginForm } from './ui/login-form';
 export { RegisterForm } from './ui/register-form';
+
+export { useSessionProfile } from './model/use-auth-session';

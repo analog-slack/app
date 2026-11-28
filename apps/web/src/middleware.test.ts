@@ -19,6 +19,14 @@ describe('auth middleware', () => {
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
 
+  it('preserves the workspace detail route when login is required', () => {
+    const request = new NextRequest('http://localhost:3000/profile/workspaces/workspace-id');
+    const response = middleware(request);
+    const location = new URL(response.headers.get('location') ?? '');
+
+    expect(location.searchParams.get('returnTo')).toBe('/profile/workspaces/workspace-id');
+  });
+
   it('continues to the profile when a session cookie is present', () => {
     const request = new NextRequest('http://localhost:3000/profile', {
       headers: { cookie: `refreshToken=${'a'.repeat(43)}` },
